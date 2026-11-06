@@ -4,12 +4,7 @@ import { ArrowUpRight, X, ChevronDown, ChevronUp, Search } from "lucide-react";
 import type { ProjectRow } from "@/server/public-data";
 import { getLenis } from "@/components/SmoothScroll";
 import { useFitTitle } from "@/hooks/use-fit-title";
-import {
-  ProjectDetailModal,
-  TechChips,
-  TechIconRow,
-  type ProjectDetail,
-} from "@/components/ProjectDetails";
+import { ProjectDetailModal, TechIconRow, type ProjectDetail } from "@/components/ProjectDetails";
 
 /** Format a date string (YYYY-MM-DD or any parseable format) into M/D/YY */
 function formatDate(raw: string): string {
@@ -354,9 +349,9 @@ function ProjectCard({
       // On a phone a small card becomes a row (picture left, text right) so its title has room to breathe
       className={`group relative cursor-pointer overflow-hidden ${isCompact ? "max-sm:flex max-sm:rounded-xl" : ""} rounded-2xl border border-slate-200 bg-white backdrop-blur-sm transition-colors hover:border-sky-500/30 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-500/30 dark:hover:bg-white/10`}
     >
-      {/* Image placeholder with gradient */}
+      {/* Screenshot area, shaped like a screenshot (16:10) so the whole page shows instead of a cropped strip */}
       <div
-        className={`relative overflow-hidden bg-gradient-to-br ${project.gradient} ${isCompact ? "h-28 max-sm:h-auto max-sm:min-h-[5.5rem] max-sm:w-28 max-sm:shrink-0 sm:h-32 md:h-40" : "h-40 md:h-48"}`}
+        className={`relative overflow-hidden bg-gradient-to-br ${project.gradient} ${isCompact ? "aspect-[16/10] max-sm:m-2.5 max-sm:mr-0 max-sm:w-32 max-sm:shrink-0 max-sm:self-start max-sm:rounded-lg" : "aspect-[16/10]"}`}
       >
         {project.image_url ? (
           <img
@@ -370,7 +365,7 @@ function ProjectCard({
           <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] [background-size:24px_24px]" />
         )}
         <div
-          className={`absolute inset-0 bg-gradient-to-t from-white via-white/70 to-transparent dark:from-[#080d19] dark:via-[#080d19]/70 dark:to-transparent ${isCompact ? "max-sm:hidden" : ""}`}
+          className={`absolute inset-0 bg-gradient-to-t from-slate-900/25 via-transparent to-transparent dark:from-black/30 ${isCompact ? "max-sm:hidden" : ""}`}
         />
 
         {/* Category and year badges on the image; a small card keeps them short so they never overlap */}
@@ -420,12 +415,12 @@ function ProjectCard({
           {project.description}
         </p>
 
-        {/* Stack tags */}
-        {isCompact ? (
-          <TechIconRow items={project.stack} className="mt-2 sm:mt-3" />
-        ) : (
-          <TechChips items={project.stack} limit={4} size="sm" className="mt-3" />
-        )}
+        {/* Stack: every technology as a plain logo (its name shows on hover) */}
+        <TechIconRow
+          items={project.stack}
+          size={isCompact ? "sm" : "md"}
+          className={isCompact ? "mt-2 sm:mt-3" : "mt-3 md:mt-4"}
+        />
 
         {/* Proof of Transaction Button */}
         {project.proof_image_url && (

@@ -18,12 +18,13 @@ export interface ProjectDetail {
   proof_image_url?: string | null;
 }
 
-/** A project's technologies as a row of plain logos (names on hover), for small cards with no room for labels */
+/** A project's technologies as a row of plain logos (names on hover), for cards with no room for labels */
 export function TechIconRow({
   items,
-  limit = 6,
+  limit,
+  size = "sm",
   className = "",
-}: Readonly<{ items: string[]; limit?: number; className?: string }>) {
+}: Readonly<{ items: string[]; limit?: number; size?: "sm" | "md"; className?: string }>) {
   // Variants share a logo (React Native uses React's): show each logo once
   const seen = new Set<string>();
   const withIcons = items.flatMap((tech) => {
@@ -32,10 +33,12 @@ export function TechIconRow({
     seen.add(icon);
     return [{ tech, icon }];
   });
-  const shown = withIcons.slice(0, limit);
+  const shown = limit ? withIcons.slice(0, limit) : withIcons;
   const hidden = withIcons.length - shown.length;
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+    <div
+      className={`flex flex-wrap items-center ${size === "md" ? "gap-2.5 sm:gap-3" : "gap-2"} ${className}`}
+    >
       {shown.map(({ tech, icon }) => (
         <img
           key={tech}
@@ -45,7 +48,7 @@ export function TechIconRow({
           loading="lazy"
           decoding="async"
           draggable={false}
-          className={`h-4 w-4 shrink-0 object-contain sm:h-[18px] sm:w-[18px] ${isDarkLogo(tech) ? "dark:invert" : ""}`}
+          className={`shrink-0 object-contain ${size === "md" ? "h-5 w-5 sm:h-6 sm:w-6" : "h-4 w-4 sm:h-[18px] sm:w-[18px]"} ${isDarkLogo(tech) ? "dark:invert" : ""}`}
         />
       ))}
       {hidden > 0 && (

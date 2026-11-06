@@ -45,46 +45,87 @@ function LinkedInIcon() {
   );
 }
 
+// The featured projects as they were last synced, with their screenshots stored in public/projects, so the
+// section still shows the real work (pictures included) if the database cannot be reached
 const FALLBACK_CELLS: ProjectCell[] = [
   {
-    title: "Atlas — SaaS dashboard",
-    meta: "Web · 2024",
-    description: "Realtime analytics for ops teams",
-    className: "md:col-span-12",
-    gradient: "from-sky-300 via-sky-500 to-blue-700",
-    stack: ["React 19", "TanStack Query", "Postgres", "Edge functions", "Tailwind v4"],
+    title: "Hopelink v2",
+    meta: "Web App · 2026",
+    description:
+      "A community platform that connects people who want to give with people who need help.",
     about:
-      "A realtime ops dashboard handling 12M+ events per day. Custom websocket layer, virtualized tables, and a design system shipped in 6 weeks.",
+      "HopeLink was built for the CFC-GK mission in Misamis Oriental. It brings together three groups: donors who give, people who need support, and volunteers who deliver.\n\nDonors can offer items or answer requests for help, and people in need can look for available donations or ask for what they need. Volunteers take on deliveries and follow their schedule, while administrators check identities and keep everything fair, so help reaches the right people. The community can also see upcoming events.",
+    stack: ["React", "Vite", "Tailwind CSS", "Supabase", "Express.js", "Zustand", "Framer Motion"],
+    gradient: "from-sky-400 to-blue-600",
+    image_url: "/projects/hopelink-v2.webp",
+    className: "md:col-span-12",
   },
   {
-    title: "Hover — fintech app",
-    meta: "Mobile · 2024",
-    description: "Spend insights with smart alerts",
-    className: "md:col-span-12",
-    gradient: "from-blue-600 via-blue-700 to-slate-900",
-    stack: ["React Native", "Expo", "tRPC", "Postgres"],
+    title: "LDCU Clinic",
+    meta: "Web App · 2026",
+    description: "Lets students and staff book medical and dental clinic visits online.",
     about:
-      "Cross-platform mobile fintech with on-device categorization, push insights, and Plaid integration. 4.8★ launch rating.",
+      "Made for the clinics of Liceo de Cagayan University. Students and staff pick an available day, book a medical or dental visit from their phone or computer, and get an email confirmation.\n\nClinic teams see who is coming, set which days are open and how many people each day can take, and can move an appointment when needed, with the reason on record. Each campus has its own schedule, and sensitive actions are logged so nothing happens unnoticed.",
+    stack: [
+      "React",
+      "TypeScript",
+      "Vite",
+      "Supabase",
+      "PostgreSQL",
+      "Tailwind CSS",
+      "Zustand",
+      "Zod",
+    ],
+    gradient: "from-emerald-400 to-cyan-600",
+    image_url: "/projects/ldcu-clinic.webp",
+    className: "md:col-span-12",
   },
   {
-    title: "Lume — design tool",
-    meta: "Web · 2023",
-    description: "Browser-native illustration suite",
-    className: "md:col-span-12",
-    gradient: "from-cyan-300 via-sky-400 to-blue-600",
-    stack: ["WebGL", "Canvas", "Yjs CRDT", "Rust + WASM"],
+    title: "MSEUF Library Portal",
+    meta: "Web App · 2026",
+    description:
+      "The online home of a university library, with a friendly AI librarian that answers student questions.",
     about:
-      "A collaborative vector editor running entirely in the browser. Real-time multiplayer via CRDTs and a Rust render core for 120fps panning.",
+      "The library of Manuel S. Enverga University Foundation in Lucena City, available online. Students and the public can browse the library's pages, search for books, read e-books and fill in forms such as appointments, registration and book renewal.\n\nA chat assistant named ROSe is on every page. It knows who the student is, looks up books on the spot and answers with details specific to the university. Librarians use a private area to manage books, reservations, students and forms, and to see how the library is being used.",
+    stack: ["Next.js", "TypeScript", "Convex", "Google Gemini AI", "Tailwind CSS", "Zustand"],
+    gradient: "from-violet-400 to-purple-600",
+    image_url: "/projects/mseuf-library-portal.webp",
+    className: "md:col-span-12",
   },
   {
-    title: "North — landing system",
-    meta: "Brand · 2023",
-    description: "Modular templates for fast launches",
-    className: "md:col-span-12",
-    gradient: "from-indigo-400 via-blue-500 to-sky-400",
-    stack: ["Next.js", "MDX", "Sanity", "Framer Motion"],
+    title: "Smart Cemetery Navigation",
+    meta: "Web App · 2026",
+    description: "An interactive map of a cemetery that makes finding plots and records easy.",
     about:
-      "A modular landing page system used by 14 startups. CMS-driven blocks, design tokens, and a launch in under a day.",
+      "Made for the Bolonsori Cemetery. Instead of paper records, every plot can be found on a map and searched by name or location.\n\nUsers can explore the cemetery and look up records, while administrators keep the plots and records up to date.",
+    stack: ["React", "TypeScript", "Vite", "Tailwind CSS", "Supabase", "Leaflet"],
+    gradient: "from-cyan-400 to-sky-600",
+    image_url: "/projects/smart-cemetery-navigation.webp",
+    className: "md:col-span-12",
+  },
+  {
+    title: "Dizkarte",
+    meta: "Mobile App · 2026",
+    description:
+      "Philippines-focused mobile marketplace where people post everyday tasks and verified Taskers make offers.",
+    about:
+      "Clients post tasks like cleaning, repairs, assembly and gardening, and verified Taskers send offers to do them.\n\nEveryone is identity-checked, payments are protected, and ratings help people choose who to trust.",
+    stack: ["Expo", "React Native", "Next.js", "TypeScript", "Supabase", "PostgreSQL", "Zod"],
+    gradient: "from-violet-400 to-purple-700",
+    image_url: "/projects/dizkarte.webp",
+    className: "md:col-span-12",
+  },
+  {
+    title: "Uy-Laurio Legal & Notarial Portal",
+    meta: "Web App · 2026",
+    description:
+      "A portal where clients of a law and notarial office submit documents and follow their case.",
+    about:
+      "Clients send their legal documents online, see where their case stands, get notifications and book appointments.\n\nThe office manages everything from its own side. Each client sees only their own information, and sign-in works with email or Google.",
+    stack: ["React", "TypeScript", "Vite", "Tailwind CSS", "Supabase", "Recharts"],
+    gradient: "from-red-400 to-rose-700",
+    image_url: "/projects/uy-laurio-legal-notarial-portal.webp",
+    className: "md:col-span-12",
   },
 ];
 
@@ -245,8 +286,15 @@ function BentoCard({
   index: number;
   onOpen: () => void;
 }>) {
-  const frontTitleRef = useFitTitle<HTMLDivElement>(cell.title);
   const backTitleRef = useFitTitle<HTMLDivElement>(cell.title);
+  // A screenshot that fails to load gives way to the project colour instead of a broken image
+  const [imageFailed, setImageFailed] = useState(false);
+  // The about text without the summary line it often starts with
+  const story = (cell.about ?? "")
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter((p) => p && p !== cell.description)
+    .join(" ");
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -260,11 +308,12 @@ function BentoCard({
         <div className="relative h-full w-full rounded-3xl transition-transform duration-700 [transform-style:preserve-3d] [will-change:transform] group-hover:[transform:rotateX(180deg)]">
           {/* Front */}
           <div className="absolute inset-0 overflow-hidden rounded-3xl bg-slate-900 [backface-visibility:hidden] [transform:translateZ(0)]">
-            {cell.image_url ? (
+            {cell.image_url && !imageFailed ? (
               <img
                 src={cell.image_url}
                 loading="lazy"
                 decoding="async"
+                onError={() => setImageFailed(true)}
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 alt={cell.title}
               />
@@ -274,22 +323,20 @@ function BentoCard({
               />
             )}
             <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] [background-size:24px_24px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-950/85 via-blue-900/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-950/25 to-transparent" />
+            {/* Keeps the label at the top readable on bright screenshots */}
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-blue-950/60 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-between p-7 md:p-9">
-              <div className="flex items-start justify-between text-white/90">
-                <span className="text-xs font-medium uppercase tracking-[0.2em]">{cell.meta}</span>
-                <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <div className="flex items-start justify-between gap-3 text-white">
+                <span className="rounded-full bg-black/40 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] backdrop-blur-sm md:text-xs">
+                  {cell.meta}
+                </span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm">
+                  <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </span>
               </div>
-              <div>
-                <div
-                  ref={frontTitleRef}
-                  className="font-display uppercase leading-[0.95] text-white text-[length:min(var(--fit,100rem),1.875rem)] md:text-[length:min(var(--fit,100rem),3rem)]"
-                >
-                  {cell.title}
-                </div>
-                <div className="mt-2 text-xs uppercase tracking-[0.2em] text-white/80">
-                  Hover to view stack
-                </div>
+              <div className="line-clamp-2 break-words text-xs font-medium uppercase leading-relaxed tracking-[0.2em] text-white md:text-sm">
+                {cell.title}
               </div>
             </div>
           </div>
@@ -298,25 +345,28 @@ function BentoCard({
           <div className="absolute inset-0 overflow-hidden rounded-3xl bg-slate-900 [backface-visibility:hidden] [transform:rotateX(180deg)_translateZ(0)]">
             <div className={`absolute inset-0 bg-gradient-to-br ${cell.gradient}`} />
             <div className="absolute inset-0 bg-blue-950/80" />
-            <div className="absolute inset-0 flex flex-col p-7 md:p-9">
-              <div className="text-xs font-medium uppercase tracking-[0.2em] text-sky-300">
-                / Stack
-              </div>
+            <div className="absolute inset-0 flex flex-col p-5 sm:p-7 md:p-9">
               <div
                 ref={backTitleRef}
-                className="mt-2 font-display uppercase leading-[0.95] text-white md:mt-3 text-[length:min(var(--fit,100rem),1.5rem)] md:text-[length:min(var(--fit,100rem),1.875rem)]"
+                className="shrink-0 font-display uppercase leading-[0.95] text-white text-[length:min(var(--fit,100rem),1.5rem)] md:text-[length:min(var(--fit,100rem),1.875rem)]"
               >
                 {cell.title}
               </div>
-              <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-white/70 md:text-sm">
+              <p className="mt-3 line-clamp-2 shrink-0 text-xs font-medium max-[359px]:line-clamp-1 leading-relaxed text-white/90 md:text-sm">
                 {cell.description}
               </p>
+              {/* The start of the full story fills the room above the stack on wide screens; the window has all of it */}
+              {story && (
+                <p className="mt-2 hidden shrink-0 text-sm leading-relaxed text-white/60 lg:line-clamp-2 xl:line-clamp-3">
+                  {story}
+                </p>
+              )}
+              {/* Every technology is listed; the text above gives way when the stack needs more rows */}
               <TechChips
                 items={cell.stack}
-                limit={6}
                 size="sm"
                 tone="light"
-                className="mt-auto pt-4"
+                className="mt-auto shrink-0 pt-3 sm:pt-4"
               />
             </div>
           </div>
