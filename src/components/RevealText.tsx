@@ -36,7 +36,10 @@ export function RevealLines({ lines, className, lineClassName, once = true }: Re
           className="block overflow-hidden"
           style={{ paddingBottom: "0.08em", marginBottom: "-0.08em" }}
         >
-          <motion.span variants={line} className={`block will-change-transform ${lineClassName ?? ""}`}>
+          <motion.span
+            variants={line}
+            className={`block will-change-transform ${lineClassName ?? ""}`}
+          >
             {l}
           </motion.span>
         </span>

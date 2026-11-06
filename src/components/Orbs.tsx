@@ -72,7 +72,11 @@ export function Orbs() {
   const orbs = isMobile ? MOBILE_ORBS : ORBS;
 
   return (
-    <div ref={ref} aria-hidden className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
+    <div
+      ref={ref}
+      aria-hidden
+      className="pointer-events-none absolute inset-0 -z-20 overflow-hidden"
+    >
       {orbs.map((o, i) => (
         <div
           key={i}

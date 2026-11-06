@@ -180,7 +180,11 @@ export function ContactModal({ open, onClose }: Props) {
                       Tell me a little about what you're building.
                     </p>
                     <div className="mt-6 hidden flex-1 flex-col items-center justify-center md:flex">
-                      <img src="/blutech-logo.png" alt="BluTech" className="h-36 w-36 object-contain opacity-100 lg:h-44 lg:w-44" />
+                      <img
+                        src="/blutech-logo.png"
+                        alt="BluTech"
+                        className="h-36 w-36 object-contain opacity-100 lg:h-44 lg:w-44"
+                      />
                       <div className="mt-6 w-full max-w-xs text-center">
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                           Or contact us in:
@@ -213,7 +217,10 @@ export function ContactModal({ open, onClose }: Props) {
                             <Linkedin className="h-4 w-4" />
                             <span>LinkedIn</span>
                           </a>
-                          <a href="tel:+639000000000" className="inline-flex items-center gap-1.5 transition-colors hover:text-sky-500">
+                          <a
+                            href="tel:+639000000000"
+                            className="inline-flex items-center gap-1.5 transition-colors hover:text-sky-500"
+                          >
                             <Phone className="h-4 w-4" />
                             <span>+63 961 711 0582</span>
                           </a>
@@ -231,7 +238,11 @@ export function ContactModal({ open, onClose }: Props) {
 
                   {/* Right side - Form */}
                   <div className="flex px-5 py-5 sm:px-6 md:col-span-8 md:items-center md:px-8 md:py-8 lg:col-span-7 lg:px-10 lg:py-10">
-                    <form onSubmit={onSubmit} className="w-full space-y-3 sm:space-y-4 lg:space-y-5" noValidate>
+                    <form
+                      onSubmit={onSubmit}
+                      className="w-full space-y-3 sm:space-y-4 lg:space-y-5"
+                      noValidate
+                    >
                       <div className="grid grid-cols-2 gap-3">
                         <Field label="Name" error={errors.name}>
                           <input
@@ -259,7 +270,10 @@ export function ContactModal({ open, onClose }: Props) {
                           <select
                             value={form.projectType}
                             onChange={(e) =>
-                              setForm({ ...form, projectType: e.target.value as FormState["projectType"] })
+                              setForm({
+                                ...form,
+                                projectType: e.target.value as FormState["projectType"],
+                              })
                             }
                             className="input"
                           >
@@ -405,8 +419,14 @@ function Field({
   return (
     <label className="block">
       <div className="mb-1 flex items-center justify-between">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 md:text-xs">{label}</span>
-        {error && <span className="text-[10px] font-medium text-red-600 dark:text-red-400 md:text-xs">{error}</span>}
+        <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 md:text-xs">
+          {label}
+        </span>
+        {error && (
+          <span className="text-[10px] font-medium text-red-600 dark:text-red-400 md:text-xs">
+            {error}
+          </span>
+        )}
       </div>
       {children}
     </label>

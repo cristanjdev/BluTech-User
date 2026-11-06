@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RevealLines, FadeUp } from "@/components/RevealText";
 import { ArrowUpRight, X } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { fetchFeaturedProjects } from "@/server/public-data";
+import type { ProjectRow } from "@/server/public-data";
+import { ProjectDetailModal, TechChips } from "@/components/ProjectDetails";
+import { useFitTitle } from "@/hooks/use-fit-title";
 
 /** Format a date string (YYYY-MM-DD or any parseable format) into M/D/YY */
 function formatDate(raw: string): string {
@@ -13,6 +14,7 @@ function formatDate(raw: string): string {
 }
 
 interface ProjectCell {
+  id?: string;
   title: string;
   meta: string;
   description: string;
@@ -86,34 +88,31 @@ const FALLBACK_CELLS: ProjectCell[] = [
   },
 ];
 
-export function Showcase() {
+export function Showcase({ projects }: Readonly<{ projects?: ProjectRow[] }>) {
   const [active, setActive] = useState<ProjectCell | null>(null);
   const [proofProject, setProofProject] = useState<ProjectCell | null>(null);
-  const doFetch = useServerFn(fetchFeaturedProjects);
-  const [cells, setCells] = useState(FALLBACK_CELLS);
-
-  useEffect(() => {
-    doFetch({}).then((rows) => {
-      if (rows && rows.length > 0) {
-        setCells(rows.map((r) => ({
-          title: r.title,
-          meta: r.meta || `${r.category} · ${r.year}`,
-          description: r.description,
-          className: "md:col-span-12",
-          gradient: r.gradient,
-          image_url: r.image_url,
-          stack: r.stack,
-          about: r.about,
-          proof_image_url: r.proof_image_url,
-          client_number: r.client_number,
-          service_type: r.service_type,
-          transaction_date: r.transaction_date,
-        })));
-      }
-    }).catch((err) => {
-      console.error("[Showcase] Failed to fetch featured projects:", err);
-    });
-  }, []);
+  // Featured projects arrive with the page (route loader); the built-in cards only show if the database is unreachable
+  const cells = useMemo<ProjectCell[]>(
+    () =>
+      projects && projects.length > 0
+        ? projects.map((r) => ({
+            id: r.id,
+            title: r.title,
+            meta: r.meta || `${r.category} · ${r.year}`,
+            description: r.description,
+            className: "md:col-span-12",
+            gradient: r.gradient,
+            image_url: r.image_url,
+            stack: r.stack,
+            about: r.about,
+            proof_image_url: r.proof_image_url,
+            client_number: r.client_number,
+            service_type: r.service_type,
+            transaction_date: r.transaction_date,
+          }))
+        : FALLBACK_CELLS,
+    [projects],
+  );
 
   const handleScrollToProjects = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -126,16 +125,16 @@ export function Showcase() {
             offset: -76,
             duration: 1.5,
             force: true,
-            lock: true
+            lock: true,
           });
         } else {
           const headerOffset = 76;
           const elementPosition = element.getBoundingClientRect().top;
           const offsetPosition = elementPosition + globalThis.scrollY - headerOffset;
-          
+
           globalThis.scrollTo({
             top: offsetPosition,
-            behavior: "smooth"
+            behavior: "smooth",
           });
         }
       });
@@ -143,7 +142,11 @@ export function Showcase() {
   };
 
   return (
-    <section id="work" className="relative bg-white dark:bg-slate-950" style={{ overflowX: 'clip' }}>
+    <section
+      id="work"
+      className="relative bg-white dark:bg-slate-950"
+      style={{ overflowX: "clip" }}
+    >
       <div className="mx-auto max-w-7xl px-6 py-24 md:py-40">
         <div className="md:grid md:grid-cols-12 md:gap-16">
           {/* Sticky left rail */}
@@ -175,9 +178,9 @@ export function Showcase() {
           {/* Right scrolling stack of cards */}
           <div className="mt-16 space-y-6 md:col-span-7 md:mt-0">
             {cells.map((c, i) => (
-              <BentoCard key={c.title} cell={c} index={i} onOpen={() => setActive(c)} />
+              <BentoCard key={c.id ?? c.title} cell={c} index={i} onOpen={() => setActive(c)} />
             ))}
-            
+
             {/* View all projects + external profile buttons */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -219,7 +222,15 @@ export function Showcase() {
         </div>
       </div>
 
-      <ProjectModal project={active} onClose={() => setActive(null)} onViewProof={(p) => { setActive(null); setProofProject(p); }} />
+      <ProjectDetailModal
+        project={active && { ...active, label: active.meta }}
+        onClose={() => setActive(null)}
+        onViewProof={() => {
+          setProofProject(active);
+          setActive(null);
+        }}
+        zIndex="z-50"
+      />
       <ShowcaseProofModal project={proofProject} onClose={() => setProofProject(null)} />
     </section>
   );
@@ -234,6 +245,8 @@ function BentoCard({
   index: number;
   onOpen: () => void;
 }>) {
+  const frontTitleRef = useFitTitle<HTMLDivElement>(cell.title);
+  const backTitleRef = useFitTitle<HTMLDivElement>(cell.title);
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -250,6 +263,8 @@ function BentoCard({
             {cell.image_url ? (
               <img
                 src={cell.image_url}
+                loading="lazy"
+                decoding="async"
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 alt={cell.title}
               />
@@ -266,7 +281,10 @@ function BentoCard({
                 <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </div>
               <div>
-                <div className="font-display text-3xl uppercase leading-[0.95] text-white md:text-5xl">
+                <div
+                  ref={frontTitleRef}
+                  className="font-display uppercase leading-[0.95] text-white text-[length:min(var(--fit,100rem),1.875rem)] md:text-[length:min(var(--fit,100rem),3rem)]"
+                >
                   {cell.title}
                 </div>
                 <div className="mt-2 text-xs uppercase tracking-[0.2em] text-white/80">
@@ -281,23 +299,25 @@ function BentoCard({
             <div className={`absolute inset-0 bg-gradient-to-br ${cell.gradient}`} />
             <div className="absolute inset-0 bg-blue-950/80" />
             <div className="absolute inset-0 flex flex-col p-7 md:p-9">
-              <div className="text-xs font-medium uppercase tracking-[0.2em] text-sky-300">/ Stack</div>
-              <div className="mt-2 font-display text-2xl uppercase leading-[0.95] text-white md:mt-3 md:text-3xl">
+              <div className="text-xs font-medium uppercase tracking-[0.2em] text-sky-300">
+                / Stack
+              </div>
+              <div
+                ref={backTitleRef}
+                className="mt-2 font-display uppercase leading-[0.95] text-white md:mt-3 text-[length:min(var(--fit,100rem),1.5rem)] md:text-[length:min(var(--fit,100rem),1.875rem)]"
+              >
                 {cell.title}
               </div>
               <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-white/70 md:text-sm">
-                {cell.about}
+                {cell.description}
               </p>
-              <div className="mt-auto flex flex-wrap gap-2 pt-4">
-                {cell.stack.map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-full border border-white/30 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
+              <TechChips
+                items={cell.stack}
+                limit={6}
+                size="sm"
+                tone="light"
+                className="mt-auto pt-4"
+              />
             </div>
           </div>
         </div>
@@ -306,89 +326,11 @@ function BentoCard({
   );
 }
 
-function ProjectModal({ project, onClose, onViewProof }: Readonly<{ project: ProjectCell | null; onClose: () => void; onViewProof: (p: ProjectCell) => void }>) {
-  return (
-    <AnimatePresence>
-      {project && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm dark:bg-slate-950/80"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ y: 30, opacity: 0, scale: 0.97 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 20, opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative h-48 overflow-hidden bg-gradient-to-br">
-              {project.image_url ? (
-                <img
-                  src={project.image_url}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  alt={project.title}
-                />
-              ) : (
-                <div className={`absolute inset-0 bg-gradient-to-br ${project.gradient}`} />
-              )}
-              <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] [background-size:24px_24px]" />
-              <button
-                onClick={onClose}
-                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur transition-colors hover:bg-white/30"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              <div className="absolute bottom-5 left-6 text-xs font-medium uppercase tracking-[0.2em] text-white/80">
-                {project.meta}
-              </div>
-            </div>
-            <div className="p-8">
-              <h3 className="font-display text-3xl uppercase leading-[0.95] text-slate-900 dark:text-white md:text-4xl">
-                {project.title}
-              </h3>
-              <p className="mt-4 text-base text-slate-600 dark:text-slate-300">{project.about}</p>
-              <div className="mt-6">
-                <div className="text-xs font-medium uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">
-                  Tech stack
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {project.stack.map((s) => (
-                    <span
-                      key={s}
-                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Proof of Transaction Button */}
-              {project.proof_image_url && (
-                <button
-                  onClick={() => onViewProof(project)}
-                  className="mt-6 inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-sky-600 transition-all hover:bg-sky-500/20 hover:border-sky-500/50 dark:text-sky-400 dark:hover:text-sky-300"
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  View Proof of Transaction
-                </button>
-              )}
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 /* ─── Proof of Transaction Modal for Showcase ─── */
-function ShowcaseProofModal({ project, onClose }: Readonly<{ project: ProjectCell | null; onClose: () => void }>) {
+function ShowcaseProofModal({
+  project,
+  onClose,
+}: Readonly<{ project: ProjectCell | null; onClose: () => void }>) {
   return (
     <AnimatePresence>
       {project && project.proof_image_url && (
@@ -414,7 +356,10 @@ function ShowcaseProofModal({ project, onClose }: Readonly<{ project: ProjectCel
 
               {/* Close button */}
               <button
-                onClick={(e) => { e.stopPropagation(); onClose(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
                 className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-500 transition-colors hover:bg-slate-300 hover:text-slate-700 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white sm:right-4 sm:top-4"
               >
                 <X className="h-4 w-4" />
@@ -426,13 +371,25 @@ function ShowcaseProofModal({ project, onClose }: Readonly<{ project: ProjectCel
                 <div className="flex flex-col items-center px-5 pt-6 md:w-1/2 md:px-8 md:py-8">
                   {/* Logo — mobile only */}
                   <div className="mb-5 flex justify-center md:hidden">
-                    <img src="/text-logo.png" alt="BluTech" className="h-10 w-auto object-contain" />
+                    <img
+                      src="/text-logo.png"
+                      alt="BluTech"
+                      className="h-10 w-auto object-contain"
+                    />
                   </div>
                   {/* Proof Screenshot */}
                   <div className="relative h-[280px] w-[240px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-xl shadow-black/10 dark:border-white/10 dark:bg-[#0c1225] dark:shadow-black/30 sm:h-[340px] sm:w-[280px] md:h-[380px] md:w-full">
-                    <img src={project.proof_image_url} alt="Proof of transaction" className="h-full w-full object-cover" />
+                    <img
+                      src={project.proof_image_url}
+                      alt="Proof of transaction"
+                      className="h-full w-full object-cover"
+                    />
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <img src="/blutech-logo.png" alt="" className="h-32 w-32 object-contain opacity-15 sm:h-40 sm:w-40 md:h-48 md:w-48" />
+                      <img
+                        src="/blutech-logo.png"
+                        alt=""
+                        className="h-32 w-32 object-contain opacity-15 sm:h-40 sm:w-40 md:h-48 md:w-48"
+                      />
                     </div>
                   </div>
                 </div>
@@ -441,7 +398,11 @@ function ShowcaseProofModal({ project, onClose }: Readonly<{ project: ProjectCel
                 <div className="flex flex-col justify-center px-5 pb-8 pt-6 md:w-1/2 md:px-8 md:py-8">
                   {/* Logo — desktop only */}
                   <div className="mb-6 hidden justify-center md:flex">
-                    <img src="/text-logo.png" alt="BluTech" className="h-12 w-auto object-contain" />
+                    <img
+                      src="/text-logo.png"
+                      alt="BluTech"
+                      className="h-12 w-auto object-contain"
+                    />
                   </div>
 
                   {/* Divider — mobile only */}
@@ -451,14 +412,22 @@ function ShowcaseProofModal({ project, onClose }: Readonly<{ project: ProjectCel
                   <div className="flex items-start justify-center gap-8 text-center md:gap-10">
                     {project.client_number && (
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">Client#</p>
-                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">{project.client_number}</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">
+                          Client#
+                        </p>
+                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">
+                          {project.client_number}
+                        </p>
                       </div>
                     )}
                     {project.transaction_date && (
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">Date</p>
-                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">{formatDate(project.transaction_date)}</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">
+                          Date
+                        </p>
+                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">
+                          {formatDate(project.transaction_date)}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -469,8 +438,12 @@ function ShowcaseProofModal({ project, onClose }: Readonly<{ project: ProjectCel
                   {/* Service Type */}
                   {project.service_type && (
                     <div className="mt-4 text-center md:mt-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">Service Type</p>
-                      <p className="mt-1 bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-lg font-black uppercase text-transparent dark:from-sky-400 dark:to-blue-400 sm:text-xl md:text-2xl">{project.service_type}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">
+                        Service Type
+                      </p>
+                      <p className="mt-1 bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-lg font-black uppercase text-transparent dark:from-sky-400 dark:to-blue-400 sm:text-xl md:text-2xl">
+                        {project.service_type}
+                      </p>
                     </div>
                   )}
                 </div>

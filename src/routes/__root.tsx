@@ -32,8 +32,7 @@ export const Route = createRootRoute({
       { title: "BluTech" },
       {
         name: "description",
-        content:
-          "Freelance commissions by BluTech — web, app, UI/UX, backend, and AI work.",
+        content: "Freelance commissions by BluTech — web, app, UI/UX, backend, and AI work.",
       },
       { name: "author", content: "BluTech" },
       { property: "og:type", content: "website" },
@@ -73,10 +72,18 @@ export const Route = createRootRoute({
   notFoundComponent: NotFoundComponent,
 });
 
+/**
+ * Runs before the page paints so dark-mode visitors never see a flash of the light theme.
+ * Uses the saved choice if there is one, otherwise the system setting. Keep in sync with ThemeProvider.
+ */
+const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("theme");var d=s==="dark"||(s!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
+
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // The theme script changes the class on <html> before React hydrates
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
       <body>

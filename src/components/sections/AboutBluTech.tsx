@@ -22,9 +22,9 @@ const ABOUT_CARDS = [
 
 export function AboutBluTech() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ 
+  const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start start", "end end"]
+    offset: ["start start", "end end"],
   });
 
   return (
@@ -41,9 +41,15 @@ export function AboutBluTech() {
               / About Us
             </span>
             <div className="mt-4 flex items-center gap-5 md:mt-5">
-              <img src="/blutech-logo.png" alt="BluTech" className="h-24 w-24 object-contain md:h-28 md:w-28 lg:h-32 lg:w-32" />
+              <img
+                src="/blutech-logo.png"
+                alt="BluTech"
+                className="h-24 w-24 object-contain md:h-28 md:w-28 lg:h-32 lg:w-32"
+              />
               <h2 className="font-display text-[clamp(2rem,8vw,4.2rem)] uppercase leading-[0.9] text-slate-900 dark:text-white md:text-[clamp(2rem,5vw,4.2rem)]">
-                Meet<br />BluTech.
+                Meet
+                <br />
+                BluTech.
               </h2>
             </div>
 
@@ -96,10 +102,11 @@ function AboutCard({
   const enterEnd = index / (total - 1);
 
   const yInput = index === 0 ? [0, 1] : [enterStart, enterEnd, 1];
-  const yOutput = index === 0 
-    ? ["0svh", `-${(total - 1 - index) * 6}svh`] 
-    : ["80svh", "0svh", `-${(total - 1 - index) * 6}svh`];
-  
+  const yOutput =
+    index === 0
+      ? ["0svh", `-${(total - 1 - index) * 6}svh`]
+      : ["80svh", "0svh", `-${(total - 1 - index) * 6}svh`];
+
   const y = useTransform(progress, yInput, yOutput);
 
   return (

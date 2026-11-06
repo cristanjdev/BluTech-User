@@ -1,6 +1,21 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Plus, Minus, Info, Calculator, Laptop, Zap, Shield, Globe, Database, Cpu, Layers, Server } from "lucide-react";
+import {
+  Check,
+  Plus,
+  Minus,
+  Info,
+  Calculator,
+  Laptop,
+  Zap,
+  Shield,
+  Globe,
+  Database,
+  Cpu,
+  Layers,
+  Server,
+  type LucideIcon,
+} from "lucide-react";
 
 interface Package {
   id: string;
@@ -18,8 +33,14 @@ const PACKAGES: Package[] = [
     name: "Basic Website",
     price: 11500, // Midpoint for calculation
     priceRange: "₱8,000 – ₱15,000",
-    description: "Ideal for student projects, personal brands, or small businesses needing a professional, high-performance presence.",
-    features: ["Essential Brand Modules", "Responsive Design Framework", "Light Dynamic Content (Basic CMS)", "Secure Contact Form Integration"],
+    description:
+      "Ideal for student projects, personal brands, or small businesses needing a professional, high-performance presence.",
+    features: [
+      "Essential Brand Modules",
+      "Responsive Design Framework",
+      "Light Dynamic Content (Basic CMS)",
+      "Secure Contact Form Integration",
+    ],
     gradient: "from-sky-400 to-blue-500",
   },
   {
@@ -27,8 +48,15 @@ const PACKAGES: Package[] = [
     name: "Standard Website",
     price: 26500, // Midpoint
     priceRange: "₱18,000 – ₱35,000",
-    description: "Best for academic capstones, theses, or growing businesses that require integrated CMS and advanced interaction.",
-    features: ["Advanced Dynamic Content Architecture", "Integrated CMS / Custom Admin Panel", "Professional SEO Structure", "Third-party API Integration", "Advanced User Interaction Modules"],
+    description:
+      "Best for academic capstones, theses, or growing businesses that require integrated CMS and advanced interaction.",
+    features: [
+      "Advanced Dynamic Content Architecture",
+      "Integrated CMS / Custom Admin Panel",
+      "Professional SEO Structure",
+      "Third-party API Integration",
+      "Advanced User Interaction Modules",
+    ],
     gradient: "from-blue-500 to-indigo-600",
   },
   {
@@ -36,8 +64,15 @@ const PACKAGES: Package[] = [
     name: "Advanced System",
     price: 60000, // Starting point
     priceRange: "₱40,000 – ₱80,000+",
-    description: "Complex full-stack systems for enterprise-grade business applications or advanced research-heavy academic projects.",
-    features: ["Enterprise-grade Custom Systems", "Secure Authentication & Identity Management", "Multi-role Administrative Dashboard", "High-performance Database Integration", "Scalable Backend Architecture"],
+    description:
+      "Complex full-stack systems for enterprise-grade business applications or advanced research-heavy academic projects.",
+    features: [
+      "Enterprise-grade Custom Systems",
+      "Secure Authentication & Identity Management",
+      "Multi-role Administrative Dashboard",
+      "High-performance Database Integration",
+      "Scalable Backend Architecture",
+    ],
     gradient: "from-indigo-600 to-violet-700",
   },
 ];
@@ -47,19 +82,49 @@ interface AddOn {
   name: string;
   price: number;
   priceRange: string;
-  icon: any;
+  icon: LucideIcon;
 }
 
 const ADD_ONS: AddOn[] = [
-  { id: "extra-page", name: "Additional Module", price: 1500, priceRange: "₱1,000 – ₱2,000", icon: Layers },
-  { id: "admin-dash", name: "Admin Dashboard", price: 7500, priceRange: "₱5,000 – ₱10,000", icon: Laptop },
+  {
+    id: "extra-page",
+    name: "Additional Module",
+    price: 1500,
+    priceRange: "₱1,000 – ₱2,000",
+    icon: Layers,
+  },
+  {
+    id: "admin-dash",
+    name: "Admin Dashboard",
+    price: 7500,
+    priceRange: "₱5,000 – ₱10,000",
+    icon: Laptop,
+  },
   { id: "auth", name: "Authentication", price: 5000, priceRange: "₱3,000 – ₱7,000", icon: Shield },
-  { id: "payment", name: "Payment (GCash/Stripe)", price: 8500, priceRange: "₱5,000 – ₱12,000", icon: Zap },
+  {
+    id: "payment",
+    name: "Payment (GCash/Stripe)",
+    price: 8500,
+    priceRange: "₱5,000 – ₱12,000",
+    icon: Zap,
+  },
   { id: "ai", name: "AI Integration", price: 14000, priceRange: "₱8,000 – ₱20,000", icon: Cpu },
   { id: "file", name: "File Handling", price: 3500, priceRange: "₱2,000 – ₱5,000", icon: Server },
-  { id: "realtime", name: "Real-time Features", price: 10000, priceRange: "₱5,000 – ₱15,000", icon: Zap },
+  {
+    id: "realtime",
+    name: "Real-time Features",
+    price: 10000,
+    priceRange: "₱5,000 – ₱15,000",
+    icon: Zap,
+  },
   { id: "seo", name: "SEO Optimization", price: 5500, priceRange: "₱3,000 – ₱8,000", icon: Globe },
-  { id: "design", name: "UI/UX Premium Design", price: 8500, priceRange: "₱5,000 – ₱12,000", icon: Layers },
+  {
+    id: "design",
+    name: "UI/UX Premium Design",
+    price: 8500,
+    priceRange: "₱5,000 – ₱12,000",
+    icon: Layers,
+  },
 ];
 
 const TECH_STACK = {
@@ -105,7 +170,8 @@ export function Pricing() {
             transition={{ delay: 0.2 }}
             className="mt-6 max-w-lg text-lg text-slate-600 dark:text-slate-400"
           >
-            Transparent packages and flexible add-ons tailored to your product&apos;s specific needs.
+            Transparent packages and flexible add-ons tailored to your product&apos;s specific
+            needs.
           </motion.p>
         </div>
 
@@ -116,29 +182,38 @@ export function Pricing() {
               key={pkg.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ 
-                scale: 1.05, 
+              whileHover={{
+                scale: 1.05,
                 zIndex: 10,
-                transition: { type: "spring", stiffness: 400, damping: 17 }
+                transition: { type: "spring", stiffness: 400, damping: 17 },
               }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 transition-shadow duration-300 hover:border-sky-300 hover:shadow-2xl hover:shadow-sky-500/10 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20"
             >
               <div className="flex items-center gap-4 mb-6">
-                <div className={`inline-flex rounded-2xl bg-gradient-to-br ${pkg.gradient} p-3 text-white`}>
+                <div
+                  className={`inline-flex rounded-2xl bg-gradient-to-br ${pkg.gradient} p-3 text-white`}
+                >
                   <Laptop className="h-6 w-6" />
                 </div>
-                <h3 className="font-display text-2xl uppercase text-slate-900 dark:text-white">{pkg.name}</h3>
+                <h3 className="font-display text-2xl uppercase text-slate-900 dark:text-white">
+                  {pkg.name}
+                </h3>
               </div>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{pkg.description}</p>
               <div className="mt-6 flex items-baseline gap-1">
-                <span className="whitespace-nowrap text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">{pkg.priceRange}</span>
+                <span className="whitespace-nowrap text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
+                  {pkg.priceRange}
+                </span>
               </div>
 
               <ul className="mt-8 space-y-4">
                 {pkg.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
+                  <li
+                    key={feature}
+                    className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300"
+                  >
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-sky-500" />
                     <span>{feature}</span>
                   </li>
@@ -306,7 +381,6 @@ export function Pricing() {
                     </div>
                   </motion.div>
                 ))}
-                
               </motion.div>
             </div>
           </div>

@@ -1,9 +1,15 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { motion, useScroll, AnimatePresence, useInView } from "framer-motion";
 import { ArrowUpRight, X, ChevronDown, ChevronUp, Search } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { fetchAllProjects } from "@/server/public-data";
+import type { ProjectRow } from "@/server/public-data";
 import { getLenis } from "@/components/SmoothScroll";
+import { useFitTitle } from "@/hooks/use-fit-title";
+import {
+  ProjectDetailModal,
+  TechChips,
+  TechIconRow,
+  type ProjectDetail,
+} from "@/components/ProjectDetails";
 
 /** Format a date string (YYYY-MM-DD or any parseable format) into M/D/YY */
 function formatDate(raw: string): string {
@@ -13,6 +19,7 @@ function formatDate(raw: string): string {
 }
 
 interface Project {
+  id?: string;
   title: string;
   category: string;
   year: string;
@@ -35,7 +42,8 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "Realtime analytics dashboard for ops teams handling 12M+ events per day.",
     stack: ["React 19", "TanStack Query", "Postgres", "Edge Functions"],
     gradient: "from-sky-400 to-blue-600",
-    about: "A realtime ops dashboard handling 12M+ events per day. Custom websocket layer, virtualized tables, and a design system shipped in 6 weeks.",
+    about:
+      "A realtime ops dashboard handling 12M+ events per day. Custom websocket layer, virtualized tables, and a design system shipped in 6 weeks.",
   },
   {
     title: "Hover Finance",
@@ -44,7 +52,8 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "Cross-platform fintech with spend insights and smart alerts.",
     stack: ["React Native", "Expo", "tRPC", "Postgres"],
     gradient: "from-blue-600 to-indigo-700",
-    about: "Cross-platform mobile fintech with on-device categorization, push insights, and Plaid integration. 4.8★ launch rating.",
+    about:
+      "Cross-platform mobile fintech with on-device categorization, push insights, and Plaid integration. 4.8★ launch rating.",
   },
   {
     title: "Lume Design",
@@ -53,7 +62,8 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "Browser-native collaborative vector editor with real-time multiplayer.",
     stack: ["WebGL", "Canvas", "Yjs CRDT", "Rust + WASM"],
     gradient: "from-cyan-400 to-sky-600",
-    about: "A collaborative vector editor running entirely in the browser. Real-time multiplayer via CRDTs and a Rust render core for 120fps panning.",
+    about:
+      "A collaborative vector editor running entirely in the browser. Real-time multiplayer via CRDTs and a Rust render core for 120fps panning.",
   },
   {
     title: "North Landing",
@@ -62,7 +72,8 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "Modular landing page system used by 14 startups.",
     stack: ["Next.js", "MDX", "Sanity", "Framer Motion"],
     gradient: "from-indigo-400 to-blue-600",
-    about: "A modular landing page system used by 14 startups. CMS-driven blocks, design tokens, and a launch in under a day.",
+    about:
+      "A modular landing page system used by 14 startups. CMS-driven blocks, design tokens, and a launch in under a day.",
   },
   {
     title: "Pulse API",
@@ -71,7 +82,8 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "High-performance API gateway with rate limiting and analytics.",
     stack: ["Node.js", "Redis", "PostgreSQL", "Docker"],
     gradient: "from-emerald-400 to-cyan-600",
-    about: "High-performance API gateway handling 50k requests/second with intelligent rate limiting, caching, and real-time analytics dashboard.",
+    about:
+      "High-performance API gateway handling 50k requests/second with intelligent rate limiting, caching, and real-time analytics dashboard.",
   },
   {
     title: "Nexus CRM",
@@ -80,7 +92,8 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "Enterprise CRM with AI-powered lead scoring and automation.",
     stack: ["React", "Python", "TensorFlow", "AWS"],
     gradient: "from-violet-400 to-purple-600",
-    about: "Enterprise CRM platform with ML-powered lead scoring, email automation, and custom workflow builder. Serving 200+ enterprise clients.",
+    about:
+      "Enterprise CRM platform with ML-powered lead scoring, email automation, and custom workflow builder. Serving 200+ enterprise clients.",
   },
   {
     title: "Quantum UI Kit",
@@ -89,7 +102,8 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "Component library with 200+ accessible, themeable components.",
     stack: ["TypeScript", "Tailwind", "Radix UI", "Storybook"],
     gradient: "from-rose-400 to-pink-600",
-    about: "A comprehensive design system with 200+ components, full accessibility support, theming, and extensive documentation. Used by 50+ teams.",
+    about:
+      "A comprehensive design system with 200+ components, full accessibility support, theming, and extensive documentation. Used by 50+ teams.",
   },
   {
     title: "StreamFlow",
@@ -98,43 +112,43 @@ const FALLBACK_PROJECTS: Project[] = [
     description: "Video streaming platform with adaptive bitrate and live features.",
     stack: ["Next.js", "HLS", "WebRTC", "CloudFlare"],
     gradient: "from-amber-400 to-orange-600",
-    about: "Video streaming platform with adaptive bitrate streaming, live broadcasting, and real-time chat. Processing 10TB of video monthly.",
+    about:
+      "Video streaming platform with adaptive bitrate streaming, live broadcasting, and real-time chat. Processing 10TB of video monthly.",
   },
 ];
 
 const INITIAL_COUNT = 4;
 
-export function Projects() {
+const toDetail = (p: Project): ProjectDetail => ({ ...p, label: `${p.category} · ${p.year}` });
+
+export function Projects({ projects }: Readonly<{ projects?: ProjectRow[] }>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [proofProject, setProofProject] = useState<Project | null>(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const [isAllProjectsModalOpen, setIsAllProjectsModalOpen] = useState(false);
-  const [allProjects, setAllProjects] = useState(FALLBACK_PROJECTS);
-  const doFetch = useServerFn(fetchAllProjects);
-
-  useEffect(() => {
-    doFetch({}).then((rows) => {
-      if (rows && rows.length > 0) {
-        setAllProjects(rows.map((r) => ({
-          title: r.title,
-          category: r.category,
-          year: r.year,
-          description: r.description,
-          stack: r.stack,
-          gradient: r.gradient,
-          image_url: r.image_url,
-          about: r.about,
-          proof_image_url: r.proof_image_url,
-          client_number: r.client_number,
-          service_type: r.service_type,
-          transaction_date: r.transaction_date,
-        })));
-      }
-    }).catch((err) => {
-      console.error("[Projects] Failed to fetch projects:", err);
-    });
-  }, []);
+  // Projects arrive with the page (route loader); the built-in list only shows if the database is unreachable
+  const allProjects = useMemo<Project[]>(
+    () =>
+      projects && projects.length > 0
+        ? projects.map((r) => ({
+            id: r.id,
+            title: r.title,
+            category: r.category,
+            year: r.year,
+            description: r.description,
+            stack: r.stack,
+            gradient: r.gradient,
+            image_url: r.image_url,
+            about: r.about,
+            proof_image_url: r.proof_image_url,
+            client_number: r.client_number,
+            service_type: r.service_type,
+            transaction_date: r.transaction_date,
+          }))
+        : FALLBACK_PROJECTS,
+    [projects],
+  );
 
   useScroll({
     target: containerRef,
@@ -145,12 +159,17 @@ export function Projects() {
   const visibleProjects = allProjects.slice(0, visibleCount);
 
   return (
-    <section id="projects" ref={containerRef} className="relative overflow-x-hidden bg-[#F8FAFC] py-24 md:py-40 dark:bg-slate-900">
+    <section
+      id="projects"
+      ref={containerRef}
+      className="relative overflow-x-hidden bg-[#F8FAFC] py-24 md:py-40 dark:bg-slate-900"
+    >
       {/* Animated background gradient */}
       <motion.div
         className="pointer-events-none absolute inset-0 opacity-30"
         style={{
-          background: "radial-gradient(ellipse 80% 50% at 50% 50%, rgba(56, 189, 248, 0.15), transparent)",
+          background:
+            "radial-gradient(ellipse 80% 50% at 50% 50%, rgba(56, 189, 248, 0.15), transparent)",
         }}
       />
 
@@ -172,7 +191,8 @@ export function Projects() {
             transition={{ delay: 0.1 }}
             className="mt-6 font-display text-[clamp(2.5rem,8vw,6rem)] uppercase leading-[0.9] text-slate-900 dark:text-white"
           >
-            Complete<br />
+            Complete
+            <br />
             <span className="bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent">
               Portfolio.
             </span>
@@ -193,7 +213,7 @@ export function Projects() {
           <AnimatePresence mode="popLayout">
             {visibleProjects.map((project, index) => (
               <ProjectCard
-                key={project.title}
+                key={project.id ?? project.title}
                 id={`project-card-${index}`}
                 project={project}
                 index={index}
@@ -211,7 +231,10 @@ export function Projects() {
           viewport={{ once: true }}
           className="mt-10 flex flex-col items-center gap-6 text-center md:mt-14 w-full"
         >
-          <div id="projects-action-bar" className="flex w-full flex-col sm:flex-row flex-wrap items-center justify-between gap-4">
+          <div
+            id="projects-action-bar"
+            className="flex w-full flex-col sm:flex-row flex-wrap items-center justify-between gap-4"
+          >
             <div className="flex flex-wrap justify-center gap-3">
               {hasMore && (
                 <button
@@ -256,7 +279,7 @@ export function Projects() {
               <Search className="h-4 w-4" />
             </button>
           </div>
-          
+
           {hasMore && (
             <span className="text-xs text-slate-500 dark:text-slate-500">
               Showing {visibleCount} of {allProjects.length} projects
@@ -266,7 +289,14 @@ export function Projects() {
       </div>
 
       {/* Project Modal */}
-      <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
+      <ProjectDetailModal
+        project={activeProject && toDetail(activeProject)}
+        onClose={() => setActiveProject(null)}
+        onViewProof={() => {
+          setProofProject(activeProject);
+          setActiveProject(null);
+        }}
+      />
 
       {/* Proof of Transaction Modal */}
       <ProofModal project={proofProject} onClose={() => setProofProject(null)} />
@@ -300,6 +330,7 @@ function ProjectCard({
 }>) {
   const cardRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(cardRef, { once: true, margin: "-100px" });
+  const titleRef = useFitTitle<HTMLHeadingElement>(project.title);
 
   // Unique staggered animation based on index
   const delay = (index % 4) * 0.1;
@@ -320,64 +351,81 @@ function ProjectCard({
       }}
       whileHover={{ y: -8, transition: { duration: 0.3 } }}
       onClick={onOpen}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white backdrop-blur-sm transition-colors hover:border-sky-500/30 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-500/30 dark:hover:bg-white/10"
+      // On a phone a small card becomes a row (picture left, text right) so its title has room to breathe
+      className={`group relative cursor-pointer overflow-hidden ${isCompact ? "max-sm:flex max-sm:rounded-xl" : ""} rounded-2xl border border-slate-200 bg-white backdrop-blur-sm transition-colors hover:border-sky-500/30 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-500/30 dark:hover:bg-white/10`}
     >
       {/* Image placeholder with gradient */}
-      <div className={`relative overflow-hidden bg-gradient-to-br ${project.gradient} ${isCompact ? 'h-28 sm:h-32 md:h-40' : 'h-40 md:h-48'}`}>
+      <div
+        className={`relative overflow-hidden bg-gradient-to-br ${project.gradient} ${isCompact ? "h-28 max-sm:h-auto max-sm:min-h-[5.5rem] max-sm:w-28 max-sm:shrink-0 sm:h-32 md:h-40" : "h-40 md:h-48"}`}
+      >
         {project.image_url ? (
           <img
             src={project.image_url}
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             alt={project.title}
           />
         ) : (
           <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] [background-size:24px_24px]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-transparent dark:from-[#080d19] dark:via-[#080d19]/70 dark:to-transparent" />
-        
-        {/* Category and year badge on image */}
-        <div className="absolute left-5 top-5 flex items-center gap-2 md:left-6 md:top-6">
-          <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium uppercase tracking-wider text-white backdrop-blur-sm">
+        <div
+          className={`absolute inset-0 bg-gradient-to-t from-white via-white/70 to-transparent dark:from-[#080d19] dark:via-[#080d19]/70 dark:to-transparent ${isCompact ? "max-sm:hidden" : ""}`}
+        />
+
+        {/* Category and year badges on the image; a small card keeps them short so they never overlap */}
+        <div
+          className={`absolute flex items-center gap-2 ${isCompact ? "max-sm:hidden left-4 right-4 top-4 justify-between" : "left-5 right-5 top-5 justify-between md:left-6 md:right-6 md:top-6"}`}
+        >
+          <span
+            className={`min-w-0 truncate rounded-full bg-black/40 font-medium uppercase tracking-wider text-white backdrop-blur-sm ${isCompact ? "px-2 py-0.5 text-[10px] md:px-3 md:py-1 md:text-xs" : "px-3 py-1 text-xs"}`}
+          >
             {project.category}
           </span>
+          <span
+            className={`shrink-0 rounded-full bg-black/40 text-white backdrop-blur-sm ${isCompact ? "px-2 py-0.5 text-[10px] md:px-3 md:py-1 md:text-xs" : "px-3 py-1 text-xs"}`}
+          >
+            {project.year}
+          </span>
         </div>
-        <span className="absolute right-5 top-5 rounded-full bg-white/20 px-3 py-1 text-xs text-white backdrop-blur-sm md:right-6 md:top-6">
-          {project.year}
-        </span>
-        
+
         {/* Hover arrow on image */}
-        <div className="absolute bottom-4 right-5 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full border border-white/20 bg-white/10 opacity-0 backdrop-blur-sm transition-all group-hover:translate-y-0 group-hover:opacity-100 md:right-6">
+        <div
+          className={`absolute bottom-4 right-5 ${isCompact ? "max-sm:hidden" : ""} flex h-10 w-10 translate-y-2 items-center justify-center rounded-full border border-white/20 bg-white/10 opacity-0 backdrop-blur-sm transition-all group-hover:translate-y-0 group-hover:opacity-100 md:right-6`}
+        >
           <ArrowUpRight className="h-4 w-4 text-white" />
         </div>
       </div>
 
       {/* Content */}
-      <div className={`p-4 ${isCompact ? 'md:p-5' : 'md:p-6'}`}>
-        <h3 className={`font-display uppercase text-slate-900 dark:text-white line-clamp-2 break-words ${isCompact ? 'text-lg sm:text-xl' : 'text-xl md:text-2xl'}`}>
+      <div className={isCompact ? "min-w-0 flex-1 p-3 sm:p-4 md:p-5" : "p-4 md:p-6"}>
+        {/* The title shrinks until its longest word fits on one line, so no word is cut in the middle.
+            Small cards allow a third line so long titles aren't cut off. */}
+        <h3
+          ref={titleRef}
+          className={`font-display uppercase leading-[1.1] text-slate-900 dark:text-white break-words ${isCompact ? "line-clamp-3 text-[length:max(0.75rem,min(var(--fit,100rem),1rem))] sm:text-[length:max(0.75rem,min(var(--fit,100rem),1.25rem))]" : "line-clamp-2 text-[length:max(0.875rem,min(var(--fit,100rem),1.25rem))] md:text-[length:max(0.875rem,min(var(--fit,100rem),1.5rem))]"}`}
+        >
           {project.title}
         </h3>
+        {isCompact && (
+          <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-sky-600 dark:text-sky-400 sm:hidden">
+            {project.category} · {project.year}
+          </p>
+        )}
 
         {/* Description */}
-        <p className={`mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400 ${isCompact ? 'line-clamp-2' : ''}`}>
+        <p
+          className={`mt-2 leading-relaxed text-slate-600 dark:text-slate-400 ${isCompact ? "line-clamp-2 text-xs sm:text-sm" : "text-sm"}`}
+        >
           {project.description}
         </p>
 
         {/* Stack tags */}
-        <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
-          {project.stack.slice(0, isCompact ? 2 : 4).map((tech) => (
-            <span
-              key={tech}
-              className="whitespace-nowrap rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 sm:px-3 sm:py-1 sm:text-xs"
-            >
-              {tech}
-            </span>
-          ))}
-          {project.stack.length > (isCompact ? 2 : 4) && (
-            <span className="whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:border-white/5 dark:bg-white/5 dark:text-slate-400 sm:px-2 sm:py-1 sm:text-xs">
-              +{project.stack.length - (isCompact ? 2 : 4)}
-            </span>
-          )}
-        </div>
+        {isCompact ? (
+          <TechIconRow items={project.stack} className="mt-2 sm:mt-3" />
+        ) : (
+          <TechChips items={project.stack} limit={4} size="sm" className="mt-3" />
+        )}
 
         {/* Proof of Transaction Button */}
         {project.proof_image_url && (
@@ -388,8 +436,18 @@ function ProjectCard({
             }}
             className="mt-4 inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-sky-600 transition-all hover:bg-sky-500/20 hover:border-sky-500/50 dark:text-sky-400 dark:hover:text-sky-300"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             View Proof of Transaction
           </button>
@@ -399,88 +457,11 @@ function ProjectCard({
   );
 }
 
-function ProjectModal({ project, onClose }: Readonly<{ project: Project | null; onClose: () => void }>) {
-  return (
-    <AnimatePresence>
-      {project && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm dark:bg-slate-950/80"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ y: 30, opacity: 0, scale: 0.97 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 20, opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className={`relative w-full max-w-2xl overflow-hidden rounded-3xl bg-gradient-to-br ${project.gradient} shadow-2xl`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Full gradient background with overlay */}
-            <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] [background-size:24px_24px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent" />
-            
-            {/* Close button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur transition-colors hover:bg-white/30"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            {/* Content overlay */}
-            <div className="relative z-10 flex min-h-[400px] flex-col justify-end p-8 md:min-h-[450px] md:p-10">
-              {/* Category and year badges */}
-              <div className="mb-4 flex items-center gap-3">
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-white backdrop-blur-sm">
-                  {project.category}
-                </span>
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs text-white backdrop-blur-sm">
-                  {project.year}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3 className="font-display text-4xl uppercase leading-[0.95] text-white md:text-5xl">
-                {project.title}
-              </h3>
-
-              {/* Description */}
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-white/80 md:text-lg">
-                {project.about}
-              </p>
-
-              {/* Tech stack */}
-              <div className="mt-6">
-                <div className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">
-                  Tech stack
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {project.stack.map((s) => (
-                    <span
-                      key={s}
-                      className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 /* ─── Proof of Transaction Modal — matches the BluTech branded design ─── */
-function ProofModal({ project, onClose }: Readonly<{ project: Project | null; onClose: () => void }>) {
+function ProofModal({
+  project,
+  onClose,
+}: Readonly<{ project: Project | null; onClose: () => void }>) {
   return (
     <AnimatePresence>
       {project && project.proof_image_url && (
@@ -506,7 +487,10 @@ function ProofModal({ project, onClose }: Readonly<{ project: Project | null; on
 
               {/* Close button */}
               <button
-                onClick={(e) => { e.stopPropagation(); onClose(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
                 className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-500 transition-colors hover:bg-slate-300 hover:text-slate-700 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20 dark:hover:text-white sm:right-4 sm:top-4"
               >
                 <X className="h-4 w-4" />
@@ -518,13 +502,25 @@ function ProofModal({ project, onClose }: Readonly<{ project: Project | null; on
                 <div className="flex flex-col items-center px-5 pt-6 md:w-1/2 md:px-8 md:py-8">
                   {/* Logo — mobile only */}
                   <div className="mb-5 flex justify-center md:hidden">
-                    <img src="/text-logo.png" alt="BluTech" className="h-10 w-auto object-contain" />
+                    <img
+                      src="/text-logo.png"
+                      alt="BluTech"
+                      className="h-10 w-auto object-contain"
+                    />
                   </div>
                   {/* Proof Screenshot */}
                   <div className="relative h-[280px] w-[240px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-xl shadow-black/10 dark:border-white/10 dark:bg-[#0c1225] dark:shadow-black/30 sm:h-[340px] sm:w-[280px] md:h-[380px] md:w-full">
-                    <img src={project.proof_image_url} alt="Proof of transaction" className="h-full w-full object-cover" />
+                    <img
+                      src={project.proof_image_url}
+                      alt="Proof of transaction"
+                      className="h-full w-full object-cover"
+                    />
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <img src="/blutech-logo.png" alt="" className="h-32 w-32 object-contain opacity-15 sm:h-40 sm:w-40 md:h-48 md:w-48" />
+                      <img
+                        src="/blutech-logo.png"
+                        alt=""
+                        className="h-32 w-32 object-contain opacity-15 sm:h-40 sm:w-40 md:h-48 md:w-48"
+                      />
                     </div>
                   </div>
                 </div>
@@ -533,7 +529,11 @@ function ProofModal({ project, onClose }: Readonly<{ project: Project | null; on
                 <div className="flex flex-col justify-center px-5 pb-8 pt-6 md:w-1/2 md:px-8 md:py-8">
                   {/* Logo — desktop only */}
                   <div className="mb-6 hidden justify-center md:flex">
-                    <img src="/text-logo.png" alt="BluTech" className="h-12 w-auto object-contain" />
+                    <img
+                      src="/text-logo.png"
+                      alt="BluTech"
+                      className="h-12 w-auto object-contain"
+                    />
                   </div>
 
                   {/* Divider — mobile only */}
@@ -543,14 +543,22 @@ function ProofModal({ project, onClose }: Readonly<{ project: Project | null; on
                   <div className="flex items-start justify-center gap-8 text-center md:gap-10">
                     {project.client_number && (
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">Client#</p>
-                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">{project.client_number}</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">
+                          Client#
+                        </p>
+                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">
+                          {project.client_number}
+                        </p>
                       </div>
                     )}
                     {project.transaction_date && (
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">Date</p>
-                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">{formatDate(project.transaction_date)}</p>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">
+                          Date
+                        </p>
+                        <p className="mt-1 text-lg font-black text-sky-600 dark:text-sky-400 sm:text-xl md:text-2xl">
+                          {formatDate(project.transaction_date)}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -561,8 +569,12 @@ function ProofModal({ project, onClose }: Readonly<{ project: Project | null; on
                   {/* Service Type */}
                   {project.service_type && (
                     <div className="mt-4 text-center md:mt-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">Service Type</p>
-                      <p className="mt-1 bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-lg font-black uppercase text-transparent dark:from-sky-400 dark:to-blue-400 sm:text-xl md:text-2xl">{project.service_type}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-white/50 sm:text-xs">
+                        Service Type
+                      </p>
+                      <p className="mt-1 bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-lg font-black uppercase text-transparent dark:from-sky-400 dark:to-blue-400 sm:text-xl md:text-2xl">
+                        {project.service_type}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -635,7 +647,9 @@ function AllProjectsModal({
             {/* Header / Search Area */}
             <div className="flex flex-col gap-4 border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center md:p-6">
               <div className="flex items-center justify-between sm:hidden">
-                <h3 className="font-display text-lg uppercase text-slate-900 dark:text-white">All Projects</h3>
+                <h3 className="font-display text-lg uppercase text-slate-900 dark:text-white">
+                  All Projects
+                </h3>
                 <button
                   onClick={onClose}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
@@ -665,10 +679,10 @@ function AllProjectsModal({
             {/* Scrollable Content */}
             <div className="custom-scrollbar flex-1 overflow-y-auto p-4 md:p-6" data-lenis-prevent>
               {filtered.length > 0 ? (
-                <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
                   {filtered.map((project, index) => (
                     <ProjectCard
-                      key={project.title}
+                      key={project.id ?? project.title}
                       project={project}
                       index={index}
                       isCompact={true}
@@ -686,7 +700,9 @@ function AllProjectsModal({
                   <div className="rounded-full bg-slate-100 p-4 dark:bg-slate-800">
                     <Search className="h-8 w-8 text-slate-400" />
                   </div>
-                  <h3 className="mt-4 text-lg font-medium text-slate-900 dark:text-white">No projects found</h3>
+                  <h3 className="mt-4 text-lg font-medium text-slate-900 dark:text-white">
+                    No projects found
+                  </h3>
                   <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                     Try adjusting your search query to find what you're looking for.
                   </p>

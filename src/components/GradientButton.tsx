@@ -20,6 +20,6 @@ export const GradientButton = forwardRef<HTMLButtonElement, Props>(
         <span className="absolute inset-0 rounded-full bg-gradient-to-r from-sky-300 to-blue-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </button>
     );
-  }
+  },
 );
 GradientButton.displayName = "GradientButton";

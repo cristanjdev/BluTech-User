@@ -1,5 +1,8 @@
 @import "tailwindcss" source(none);
 @source "../src";
+/* Project gradients are chosen in the admin app and stored in the database, so they never appear
+   in this codebase for Tailwind to find. Generate the whole palette range they can use. */
+@source inline("{from,via,to}-{slate,sky,blue,cyan,indigo,emerald,teal,green,violet,purple,fuchsia,rose,pink,red,amber,orange}-{300,400,500,600,700,800,900}");
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -138,7 +141,14 @@
   }
 
   html {
-    font-family: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family:
+      "Archivo",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
     font-feature-settings: "ss01", "cv11";
   }
 
@@ -173,8 +183,12 @@
 }
 
 @keyframes scroll-x {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* Custom Scrollbar */
@@ -205,4 +219,3 @@
 .dark .custom-scrollbar {
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
-

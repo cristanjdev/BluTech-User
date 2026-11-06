@@ -26,9 +26,9 @@ const STEPS = [
 
 export function About() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ 
+  const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start start", "end end"]
+    offset: ["start start", "end end"],
   });
 
   return (
@@ -46,7 +46,9 @@ export function About() {
               / Process
             </span>
             <h2 className="mt-3 font-display text-[clamp(2rem,8vw,4.2rem)] uppercase leading-[0.9] text-slate-900 dark:text-white md:mt-4 md:text-[clamp(2rem,5vw,4.2rem)]">
-              From idea<br />to launch.
+              From idea
+              <br />
+              to launch.
             </h2>
 
             {/* Horizontal progress bar — compact */}
@@ -98,10 +100,11 @@ function Step({
   const enterEnd = index / (total - 1);
 
   const yInput = index === 0 ? [0, 1] : [enterStart, enterEnd, 1];
-  const yOutput = index === 0 
-    ? ["0svh", `-${(total - 1 - index) * 6}svh`] 
-    : ["80svh", "0svh", `-${(total - 1 - index) * 6}svh`];
-  
+  const yOutput =
+    index === 0
+      ? ["0svh", `-${(total - 1 - index) * 6}svh`]
+      : ["80svh", "0svh", `-${(total - 1 - index) * 6}svh`];
+
   const y = useTransform(progress, yInput, yOutput);
 
   return (
@@ -111,7 +114,9 @@ function Step({
         className="flex w-full flex-col origin-top overflow-hidden rounded-3xl border border-slate-200 bg-white px-5 pb-5 pt-3 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.25)] dark:border-slate-700 dark:bg-slate-800 dark:shadow-[0_30px_80px_-40px_rgba(0,0,0,0.5)] sm:px-6 sm:pb-6 sm:pt-4 md:px-9 md:pb-9 md:pt-5"
       >
         <div className="flex items-center justify-between">
-          <span className="font-display text-sm tabular-nums text-sky-600 dark:text-sky-400">{step.n}</span>
+          <span className="font-display text-sm tabular-nums text-sky-600 dark:text-sky-400">
+            {step.n}
+          </span>
           <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
             Step {index + 1} of {total}
           </span>
@@ -119,7 +124,9 @@ function Step({
         <h3 className="mt-6 font-display text-[clamp(1.65rem,8vw,3rem)] uppercase leading-[0.95] text-slate-900 dark:text-white md:mt-8 md:text-[clamp(2rem,4vw,3.25rem)]">
           {step.title}
         </h3>
-        <p className="mt-3 max-w-lg text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:mt-4 md:text-base">{step.desc}</p>
+        <p className="mt-3 max-w-lg text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:mt-4 md:text-base">
+          {step.desc}
+        </p>
       </motion.div>
     </div>
   );

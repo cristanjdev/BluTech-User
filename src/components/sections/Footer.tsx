@@ -38,60 +38,109 @@ export function Footer() {
               <span className="text-sm uppercase tracking-[0.2em] text-sky-400">BluTech</span>
             </div>
             <p className="mt-6 max-w-md mx-auto md:mx-0 text-lg text-slate-300">
-              Crafting polished digital experiences — from pixel-perfect interfaces to robust backend systems. Available for commissions worldwide.
+              Crafting polished digital experiences — from pixel-perfect interfaces to robust
+              backend systems. Available for commissions worldwide.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-10 sm:gap-16 md:col-span-6">
             <div className="flex flex-col items-center text-center md:col-span-1 md:items-start md:text-left">
               <div className="text-xs uppercase tracking-wider text-slate-500">Connect</div>
-            <ul className="mt-4 space-y-2 text-slate-200">
-              <li>
-                <a href="https://github.com/blutech18" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400">
-                  <Github className="h-4 w-4" /> GitHub
-                </a>
-              </li>
-              <li>
-                <a href="https://www.linkedin.com/in/cjjumawan/" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400">
-                  <Linkedin className="h-4 w-4" /> LinkedIn
-                </a>
-              </li>
-              <li>
-                <a href="https://www.facebook.com/profile.php?id=61576743929523" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400">
-                  <FacebookIcon /> Facebook
-                </a>
-              </li>
-              <li>
-                <a href="https://tiktok.com/@blutech18" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400">
-                  <TikTokIcon /> TikTok
-                </a>
-              </li>
-              <li>
-                <a href="tel:+639617110582" className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400">
-                  <Phone className="h-4 w-4" /> <span className="hidden sm:inline">+63 961 711 0582</span><span className="sm:hidden">Call</span>
-                </a>
-              </li>
-              <li>
-                <a href="mailto:blutech18@gmail.com" className="inline-flex w-full items-center justify-center md:justify-start gap-2 hover:text-sky-400 truncate">
-                  <Mail className="h-4 w-4 shrink-0" /> <span className="truncate">Email</span>
-                </a>
-              </li>
-            </ul>
+              <ul className="mt-4 space-y-2 text-slate-200">
+                <li>
+                  <a
+                    href="https://github.com/blutech18"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400"
+                  >
+                    <Github className="h-4 w-4" /> GitHub
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.linkedin.com/in/cjjumawan/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400"
+                  >
+                    <Linkedin className="h-4 w-4" /> LinkedIn
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61576743929523"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400"
+                  >
+                    <FacebookIcon /> Facebook
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://tiktok.com/@blutech18"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400"
+                  >
+                    <TikTokIcon /> TikTok
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="tel:+639617110582"
+                    className="inline-flex items-center justify-center md:justify-start gap-2 hover:text-sky-400"
+                  >
+                    <Phone className="h-4 w-4" />{" "}
+                    <span className="hidden sm:inline">+63 961 711 0582</span>
+                    <span className="sm:hidden">Call</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="mailto:blutech18@gmail.com"
+                    className="inline-flex w-full items-center justify-center md:justify-start gap-2 hover:text-sky-400 truncate"
+                  >
+                    <Mail className="h-4 w-4 shrink-0" /> <span className="truncate">Email</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div className="flex flex-col items-center text-center md:col-span-1 md:items-start md:text-left">
+              <div className="text-xs uppercase tracking-wider text-slate-500">Sitemap</div>
+              <ul className="mt-4 space-y-2 text-slate-200">
+                <li>
+                  <a href="#top" className="hover:text-sky-400">
+                    Home
+                  </a>
+                </li>
+                <li>
+                  <a href="#services" className="hover:text-sky-400">
+                    Services
+                  </a>
+                </li>
+                <li>
+                  <a href="#work" className="hover:text-sky-400">
+                    Work
+                  </a>
+                </li>
+                <li>
+                  <a href="#about" className="hover:text-sky-400">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#projects" className="hover:text-sky-400">
+                    Projects
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="flex flex-col items-center text-center md:col-span-1 md:items-start md:text-left">
-            <div className="text-xs uppercase tracking-wider text-slate-500">Sitemap</div>
-            <ul className="mt-4 space-y-2 text-slate-200">
-              <li><a href="#top" className="hover:text-sky-400">Home</a></li>
-              <li><a href="#services" className="hover:text-sky-400">Services</a></li>
-              <li><a href="#work" className="hover:text-sky-400">Work</a></li>
-              <li><a href="#about" className="hover:text-sky-400">About</a></li>
-              <li><a href="#projects" className="hover:text-sky-400">Projects</a></li>
-            </ul>
-          </div>
-        </div>
         </div>
       </div>
 
-      <div 
+      <div
         className="group relative mt-20 flex w-full select-none justify-center px-4 py-4 md:px-6"
         onMouseMove={handleMouseMove}
       >

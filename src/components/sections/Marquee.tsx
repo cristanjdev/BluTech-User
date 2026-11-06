@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { fetchServices } from "@/server/public-data";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ServiceRow } from "@/server/public-data";
 
 const FALLBACK_ITEMS = [
   "Web Development",
@@ -13,21 +12,17 @@ const FALLBACK_ITEMS = [
 
 const GAP = 48;
 
-export function Marquee() {
+export function Marquee({ services }: Readonly<{ services?: ServiceRow[] }>) {
   const stripRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
-  const [items, setItems] = useState(FALLBACK_ITEMS);
-
-  const doFetch = useServerFn(fetchServices);
-
-  useEffect(() => {
-    doFetch({}).then((rows) => {
-      if (rows && rows.length > 0) {
-        // Use service titles + "BluTech Studio" as the marquee items
-        setItems([...rows.map((r) => r.title), "BluTech Studio"]);
-      }
-    }).catch(() => {});
-  }, []);
+  // Service titles + "BluTech Studio" as the marquee items
+  const items = useMemo(
+    () =>
+      services && services.length > 0
+        ? [...services.map((r) => r.title), "BluTech Studio"]
+        : FALLBACK_ITEMS,
+    [services],
+  );
 
   useEffect(() => {
     if (!stripRef.current) return;

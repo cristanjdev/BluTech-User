@@ -6,9 +6,9 @@ import {
   checkRateLimit,
   isIpBlocked,
   recordStrike,
-  sanitizeString,
-  hasSqlInjection,
+  normalizeText,
   isSpam,
+  LIMITS,
 } from "./security";
 import { notifyNewCommission } from "./email";
 
@@ -24,7 +24,13 @@ export const commissionSchema = z.object({
 
 export type CommissionInput = z.infer<typeof commissionSchema>;
 
-let tableEnsured = false;
+/** Most requests one email address may send per rate-limit window (shared across all server instances). */
+const MAX_PER_EMAIL = LIMITS.commission.maxRequests;
+/** Most requests the whole site accepts per window, so a bot rotating IPs and emails can't flood the inbox. */
+const MAX_SITE_WIDE = 30;
+const WINDOW_SECONDS = LIMITS.commission.windowMs / 1000;
+
+const TOO_MANY = { ok: false as const, error: "Too many requests. Try again later." };
 
 export const submitCommission = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => commissionSchema.parse(input))
@@ -37,54 +43,45 @@ export const submitCommission = createServerFn({ method: "POST" })
 
     const ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
 
-    // 1. IP block check
-    if (isIpBlocked(ip)) {
-      return { ok: false as const, error: "Too many requests. Try again later." };
-    }
+    // 1. IP block check (per instance)
+    if (isIpBlocked(ip)) return TOO_MANY;
 
-    // 2. Rate limit
-    const limit = checkRateLimit(ip, "commission");
-    if (!limit.allowed) {
+    // 2. Rate limit by IP (per instance)
+    if (!checkRateLimit(ip, "commission").allowed) {
       recordStrike(ip);
-      return { ok: false as const, error: "Too many requests. Try again later." };
+      return TOO_MANY;
     }
 
-    // 3. SQL injection detection (defense in depth — queries are parameterized, but reject suspicious input)
-    const allInput = `${data.name} ${data.email} ${data.message} ${data.budget ?? ""}`;
-    if (hasSqlInjection(allInput)) {
-      recordStrike(ip);
-      return { ok: false as const, error: "Invalid input detected." };
-    }
-
-    // 4. Spam detection
+    // 3. Spam detection
     if (isSpam(data.message) || isSpam(data.name)) {
       recordStrike(ip);
       return { ok: false as const, error: "Your message was flagged as spam." };
     }
 
-    // 5. Sanitize all string inputs
-    const name = sanitizeString(data.name);
+    // 4. Store the text as typed (minus control characters). Queries are parameterized, and the
+    //    email template escapes everything it inserts, so no HTML-escaping happens here.
+    const name = normalizeText(data.name);
     const email = data.email.toLowerCase().trim();
-    const message = sanitizeString(data.message);
-    const budget = data.budget ? sanitizeString(data.budget) : null;
+    const message = normalizeText(data.message);
+    const budget = data.budget ? normalizeText(data.budget) : null;
 
     try {
       const sql = neon(url);
-      if (!tableEnsured) {
-        await sql`CREATE TABLE IF NOT EXISTS commissions (
-          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-          name text NOT NULL,
-          email text NOT NULL,
-          project_type text NOT NULL,
-          budget text,
-          message text NOT NULL,
-          status text NOT NULL DEFAULT 'pending',
-          admin_notes text,
-          created_at timestamptz NOT NULL DEFAULT now(),
-          updated_at timestamptz NOT NULL DEFAULT now()
-        )`;
-        tableEnsured = true;
+
+      // 5. Rate limits that hold across server instances, checked against stored commissions.
+      //    The commissions table is created and migrated by the admin app.
+      const [counts] = await sql`
+        SELECT
+          count(*) FILTER (WHERE email = ${email})::int AS by_email,
+          count(*)::int AS site_wide
+        FROM commissions
+        WHERE created_at > now() - make_interval(secs => ${WINDOW_SECONDS})
+      `;
+      if (counts && (counts.by_email >= MAX_PER_EMAIL || counts.site_wide >= MAX_SITE_WIDE)) {
+        recordStrike(ip);
+        return TOO_MANY;
       }
+
       await sql`INSERT INTO commissions (name, email, project_type, budget, message)
         VALUES (${name}, ${email}, ${data.projectType}, ${budget}, ${message})`;
 

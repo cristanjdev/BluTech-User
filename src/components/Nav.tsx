@@ -13,22 +13,22 @@ export function Nav({ onCtaClick }: Readonly<NavProps>) {
   const [activeSection, setActiveSection] = useState("top");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const clickedSectionRef = useRef<string | null>(null);
-  const scrollTimeoutRef = useRef<number | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { theme, toggleTheme } = useTheme();
 
   const handleScrollTo = useCallback((e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
     e.stopPropagation();
     setIsMobileMenuOpen(false);
-    
+
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
       scrollTimeoutRef.current = null;
     }
-    
+
     setActiveSection(targetId);
     clickedSectionRef.current = targetId;
-    
+
     const element = document.getElementById(targetId);
     if (element) {
       const lenis = getLenis();
@@ -46,13 +46,13 @@ export function Nav({ onCtaClick }: Readonly<NavProps>) {
         const rect = element.getBoundingClientRect();
         const top = rect.top + globalThis.scrollY - headerOffset;
         globalThis.scrollTo({ top, behavior: "smooth" });
-        
+
         // Safety for fallback
         setTimeout(() => {
           clickedSectionRef.current = null;
         }, 1000);
       }
-      
+
       // Secondary safety timeout
       scrollTimeoutRef.current = globalThis.setTimeout(() => {
         clickedSectionRef.current = null;
@@ -72,7 +72,7 @@ export function Nav({ onCtaClick }: Readonly<NavProps>) {
       // Determine active section based on scroll position
       const sections = ["top", "services", "pricing", "work", "about", "projects"];
       const headerOffset = 100;
-      
+
       for (const sectionId of [...sections].reverse()) {
         const element = document.getElementById(sectionId);
         if (element) {
@@ -84,7 +84,7 @@ export function Nav({ onCtaClick }: Readonly<NavProps>) {
         }
       }
     };
-    
+
     onScroll();
     globalThis.addEventListener("scroll", onScroll, { passive: true });
     return () => {
@@ -125,18 +125,24 @@ export function Nav({ onCtaClick }: Readonly<NavProps>) {
           >
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <a 
-            href="#top" 
+          <a
+            href="#top"
             onClick={(e) => handleScrollTo(e, "top")}
             className="flex items-center gap-2"
           >
-            <img src="/blutech-logo.png" alt="BluTech" className="h-9 w-9 object-contain sm:h-10 sm:w-10" />
-            <span className="hidden sm:inline-block text-lg font-semibold tracking-tight text-slate-900 dark:text-white">BluTech</span>
+            <img
+              src="/blutech-logo.png"
+              alt="BluTech"
+              className="h-9 w-9 object-contain sm:h-10 sm:w-10"
+            />
+            <span className="hidden sm:inline-block text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
+              BluTech
+            </span>
           </a>
         </div>
         <div className="relative hidden items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300 md:flex">
           {navLinks.map((link) => (
-            <a 
+            <a
               key={link.id}
               href={`#${link.id}`}
               onClick={(e) => handleScrollTo(e, link.id)}

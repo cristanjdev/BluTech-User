@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/sections/Hero";
@@ -14,8 +14,11 @@ import { ContactCta } from "@/components/sections/ContactCta";
 import { Footer } from "@/components/sections/Footer";
 import { ContactModal } from "@/components/ContactModal";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { fetchHomeData } from "@/server/public-data";
 
 export const Route = createFileRoute("/")({
+  // Loaded on the server for the first render, so visitors and search engines get the real content.
+  loader: () => fetchHomeData(),
   component: Index,
   head: () => ({
     meta: [
@@ -28,14 +31,17 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "BluTech" },
       {
         property: "og:description",
-        content:
-          "Freelance commissions by BluTech — web, app, UI/UX, backend, and AI. Available for Q3.",
+        content: "Freelance commissions by BluTech — web, app, UI/UX, backend, and AI work.",
       },
     ],
   }),
 });
 
 function Index() {
+  const data = Route.useLoaderData();
+  const services = data?.services;
+  const projects = data?.projects;
+  const featured = useMemo(() => projects?.filter((p) => p.is_featured), [projects]);
   const [open, setOpen] = useState(false);
   const openModal = () => setOpen(true);
   return (
@@ -44,13 +50,13 @@ function Index() {
         <SmoothScroll />
         <Nav onCtaClick={openModal} />
         <Hero onCtaClick={openModal} />
-        <Marquee />
-        <Services />
+        <Marquee services={services} />
+        <Services services={services} />
         <Pricing />
-        <Showcase />
+        <Showcase projects={featured} />
         <About />
         <AboutBluTech />
-        <Projects />
+        <Projects projects={projects} />
         <ContactCta onCtaClick={openModal} />
         <Footer />
         <ContactModal open={open} onClose={() => setOpen(false)} />
