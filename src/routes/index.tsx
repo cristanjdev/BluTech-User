@@ -34,6 +34,7 @@ export const Route = createFileRoute("/")({
         content: "Freelance commissions by BluTech — web, app, UI/UX, backend, and AI work.",
       },
     ],
+    links: [{ rel: "canonical", href: "https://www.blutechnology.org/" }],
   }),
 });
 

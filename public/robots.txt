@@ -1,2 +1,6 @@
+# Search engines and other crawlers may index the site, but not its internal API routes.
 User-agent: *
 Allow: /
+Disallow: /api/
+
+Sitemap: https://www.blutechnology.org/sitemap.xml

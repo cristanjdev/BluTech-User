@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Github, Linkedin, Mail, Phone } from "lucide-react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 
@@ -171,7 +172,18 @@ export function Footer() {
 
       <div className="mx-auto max-w-7xl px-6">
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-slate-500 md:flex-row">
-          <div>© {year} BluTech. All rights reserved.</div>
+          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
+            <span>© {year} BluTech. All rights reserved.</span>
+            <span aria-hidden="true" className="hidden sm:inline">
+              ·
+            </span>
+            <Link
+              to="/privacy"
+              className="underline-offset-4 transition-colors hover:text-sky-400 hover:underline"
+            >
+              Privacy Policy
+            </Link>
+          </div>
           <div>Built with care · TanStack Start · Lenis · Framer Motion</div>
         </div>
       </div>

@@ -36,14 +36,17 @@ export const Route = createRootRoute({
       },
       { name: "author", content: "BluTech" },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://blutechnology.org" },
+      { property: "og:url", content: "https://www.blutechnology.org/" },
+      { property: "og:site_name", content: "BluTech" },
       { property: "og:title", content: "BluTech" },
       {
         property: "og:description",
         content: "Freelance commissions by BluTech — web, app, UI/UX, backend, and AI work.",
       },
-      { property: "og:image", content: "https://blutechnology.org/blutech-logo.png" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://www.blutechnology.org/blutech-logo.png" },
+      { property: "og:image:alt", content: "BluTech logo" },
+      { name: "theme-color", content: "#020617" },
+      { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "BluTech" },
       {
         name: "twitter:description",
@@ -55,6 +58,7 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon-48.png", type: "image/png", sizes: "48x48" },
       { rel: "icon", href: "/favicon-192.png", type: "image/png", sizes: "192x192" },
       { rel: "apple-touch-icon", href: "/favicon-192.png", sizes: "192x192" },
+      { rel: "manifest", href: "/site.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

@@ -1,0 +1,6 @@
+# How to report a security problem with this website (RFC 9116)
+Contact: mailto:blutech18@gmail.com
+Expires: 2027-11-07T00:00:00.000Z
+Preferred-Languages: en, fil
+Canonical: https://www.blutechnology.org/.well-known/security.txt
+Policy: https://www.blutechnology.org/privacy

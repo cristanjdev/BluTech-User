@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, Loader2, Phone, Mail, Linkedin } from "lucide-react";
@@ -326,6 +327,16 @@ export function ContactModal({ open, onClose }: Props) {
                           "Send request"
                         )}
                       </button>
+                      <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                        Your details are used only to reply about your project. See the{" "}
+                        <Link
+                          to="/privacy"
+                          className="underline underline-offset-4 hover:text-slate-900 dark:hover:text-white"
+                        >
+                          Privacy Policy
+                        </Link>
+                        .
+                      </p>
                     </form>
                   </div>
                 </div>

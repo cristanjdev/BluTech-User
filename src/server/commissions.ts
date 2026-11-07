@@ -12,6 +12,10 @@ import {
 } from "./security";
 import { notifyNewCommission } from "./email";
 
+// Zod checks whether it may compile validators with `new Function`. The site's Content-Security-Policy
+// forbids that, so the check shows up as a blocked-eval error in the console; skip it and use the normal path.
+z.config({ jitless: true });
+
 const PROJECT_TYPES = ["web", "app", "uiux", "backend", "automation", "other"] as const;
 
 export const commissionSchema = z.object({
